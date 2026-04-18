@@ -8,7 +8,7 @@ const Dashboard = () => {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/metrics');
+      const response = await fetch('https://ai-cctv-dashboard.onrender.com/api/metrics');
       const data = await response.json();
       setMetrics(data);
     } catch (error) {
