@@ -1,14 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Activity, Users, Monitor, Clock, Package, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Activity,
+  Users,
+  Monitor,
+  Clock,
+  Package,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 
 const Dashboard = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://ai-cctv-dashboard.onrender.com/api/metrics');
+      const response = await fetch(
+        "https://ai-cctv-dashboard.onrender.com/api/metrics",
+      );
       const data = await response.json();
       setMetrics(data);
     } catch (error) {
@@ -37,10 +48,12 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center border-b-2 border-black pb-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Factory Productivity</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Factory Productivity
+            </h1>
             <p className="text-gray-500 mt-1">Real-time AI Vision Analytics</p>
           </div>
-          <button 
+          <button
             onClick={fetchMetrics}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white hover:bg-gray-800 transition-colors rounded-md"
           >
@@ -48,25 +61,48 @@ const Dashboard = () => {
           </button>
         </div>
 
+        {/* Search Filter */}
+        <div className="relative max-w-md">
+          <Search className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Filter by worker or workstation name..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         {/* Factory Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-500 uppercase text-sm">Total Active Time</h3>
+              <h3 className="font-semibold text-gray-500 uppercase text-sm">
+                Total Active Time
+              </h3>
               <Clock className="w-5 h-5 text-black" />
             </div>
-            <p className="text-3xl font-bold">{metrics.factorySummary.totalActiveTimeMinutes} <span className="text-lg font-normal text-gray-500">mins</span></p>
+            <p className="text-3xl font-bold">
+              {metrics.factorySummary.totalActiveTimeMinutes}{" "}
+              <span className="text-lg font-normal text-gray-500">mins</span>
+            </p>
           </div>
           <div className="bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-500 uppercase text-sm">Total Units Produced</h3>
+              <h3 className="font-semibold text-gray-500 uppercase text-sm">
+                Total Units Produced
+              </h3>
               <Package className="w-5 h-5 text-black" />
             </div>
-            <p className="text-3xl font-bold">{metrics.factorySummary.totalUnitsProduced}</p>
+            <p className="text-3xl font-bold">
+              {metrics.factorySummary.totalUnitsProduced}
+            </p>
           </div>
           <div className="bg-white p-6 border border-gray-200 rounded-lg shadow-sm bg-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-500 uppercase text-sm">System Status</h3>
+              <h3 className="font-semibold text-gray-500 uppercase text-sm">
+                System Status
+              </h3>
               <Activity className="w-5 h-5 text-black" />
             </div>
             <p className="text-xl font-bold text-black flex items-center gap-2">
@@ -97,18 +133,27 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {metrics.workers.map((worker) => (
-                    <tr key={worker.worker_id} className="hover:bg-gray-50 transition-colors">
+                  {metrics.workers
+                    .filter(worker => worker.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((worker) => (
+                    <tr
+                      key={worker.worker_id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="p-4 font-medium">{worker.name}</td>
                       <td className="p-4">{worker.activeTime}m</td>
                       <td className="p-4">{worker.idleTime}m</td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <span className="w-8">{worker.utilizationPercentage}%</span>
+                          <span className="w-8">
+                            {worker.utilizationPercentage}%
+                          </span>
                           <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-black" 
-                              style={{ width: `${worker.utilizationPercentage}%` }}
+                            <div
+                              className="h-full bg-black"
+                              style={{
+                                width: `${worker.utilizationPercentage}%`,
+                              }}
                             ></div>
                           </div>
                         </div>
@@ -137,8 +182,13 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {metrics.workstations.map((station) => (
-                    <tr key={station.station_id} className="hover:bg-gray-50 transition-colors">
+                  {metrics.workstations
+                    .filter(station => station.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((station) => (
+                    <tr
+                      key={station.station_id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="p-4 font-medium">{station.name}</td>
                       <td className="p-4">{station.activeTime}m</td>
                       <td className="p-4 font-bold">{station.totalUnits}</td>
@@ -148,7 +198,6 @@ const Dashboard = () => {
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>
